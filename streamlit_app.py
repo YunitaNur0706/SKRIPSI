@@ -190,10 +190,8 @@ elif menu == "Pemodelan":
             if model_choice == "Elastic Net":
                 l1_ratio = st.slider("l1_ratio Elastic Net", 0.01, 1.0, 0.5)
 
-        # GUNAKAN HANYA KOLOM NUMERIK
-        X = df.drop('Persentase Penduduk Miskin', axis=1).select_dtypes(include=[np.number])
+        X = df.drop('Persentase Penduduk Miskin', axis=1)
         y = df['Persentase Penduduk Miskin']
-
         X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=test_size, random_state=42)
         scaler = StandardScaler()
         X_train_scaled, X_test_scaled = scaler.fit_transform(X_train), scaler.transform(X_test)
@@ -228,11 +226,34 @@ elif menu == "Pemodelan":
             st.write(f"R²: {metrics.r2_score(y_test, y_pred):.4f}")
             st.write("Intercept:", model.intercept_)
             st.write("Koefisien:", model.coef_)
+
+            # TAMPILKAN NAMA VARIABEL + KOEFISIEN
+            coef_df = pd.DataFrame({
+                "Feature": X.columns,
+                "Coefficient": model.coef_
+            })
+
+            st.subheader(f"Koefisien Model {model_choice}")
+            st.dataframe(coef_df)
+
+            if model_choice == "Lasso":
+                eliminated = coef_df[coef_df['Coefficient'] == 0]
+                remaining = coef_df[coef_df['Coefficient'] != 0]
+
+                st.subheader("Variabel Dieliminasi oleh Lasso (Koefisien = 0)")
+                if eliminated.empty:
+                    st.write("Tidak ada variabel yang dieliminasi. Semua variabel tetap digunakan model.")
+                else:
+                    st.dataframe(eliminated)
+
+                st.subheader("Variabel yang Tetap Digunakan (Koefisien ≠ 0)")
+                st.dataframe(remaining)
+
     else:
         st.error("Silakan lakukan preprocessing terlebih dahulu di menu Preprocessing.")
-
-    st.success("Preprocessing Data Selesai! Anda siap melanjutkan ke modeling Elastic Net Regression.")
+        st.success("Preprocessing Data Selesai! Anda siap melanjutkan ke modeling Elastic Net Regression.")
 
 else:
     st.info("Silakan upload dataset Anda di sidebar untuk memulai analisis.")
+
 
