@@ -1,3 +1,4 @@
+import optuna
 import streamlit as st
 import pandas as pd
 import numpy as np
@@ -10,7 +11,6 @@ from sklearn.preprocessing import StandardScaler
 from sklearn.linear_model import LinearRegression, RidgeCV, LassoCV, ElasticNetCV, ElasticNet
 from sklearn import metrics
 from statsmodels.stats.outliers_influence import variance_inflation_factor
-import optuna
 warnings.filterwarnings('ignore')
 
 st.set_page_config(page_title="Analisis Kemiskinan dengan Regularisasi", layout="wide")
@@ -211,6 +211,8 @@ elif menu == "Pemodelan":
             elif model_choice == "Elastic Net":
                 model = ElasticNetCV(l1_ratio=[l1_ratio], alphas=[alpha], max_iter=10000).fit(X_train_scaled, y_train)
             elif model_choice == "Elastic Net Optuna":
+                n_trials = st.number_input("Jumlah trial Optuna", min_value=10, max_value=500, value=100, step=10)
+
                 def objective(trial):
                     alpha_opt = trial.suggest_float('alpha', 1e-5, 1.0, log=True)
                     l1_ratio_opt = trial.suggest_float('l1_ratio', 0.01, 1.0)
@@ -218,7 +220,7 @@ elif menu == "Pemodelan":
                     return np.mean(cross_val_score(model_opt, X_train_scaled, y_train, scoring="r2", cv=5))
 
                 study = optuna.create_study(direction='maximize')
-                study.optimize(objective, n_trials=100)
+                study.optimize(objective, n_trials=n_trials)
                 best_alpha, best_l1_ratio = study.best_params['alpha'], study.best_params['l1_ratio']
                 st.write(f"Optimal alpha: {best_alpha:.6f}, Optimal l1_ratio: {best_l1_ratio:.6f}")
                 model = ElasticNet(alpha=best_alpha, l1_ratio=best_l1_ratio, max_iter=10000, random_state=42).fit(X_train_scaled, y_train)
@@ -232,7 +234,6 @@ elif menu == "Pemodelan":
             st.write("Intercept:", model.intercept_)
             st.write("Koefisien:", model.coef_)
 
-            
             # TAMPILKAN NAMA VARIABEL + KOEFISIEN
             coef_df = pd.DataFrame({
                 "Feature": X_num.columns,
@@ -261,5 +262,4 @@ elif menu == "Pemodelan":
 
 else:
     st.info("Silakan upload dataset Anda di sidebar untuk memulai analisis.")
-
 
