@@ -92,30 +92,78 @@ elif menu == "EDA":
 elif menu == "Preprocessing":
     if "df" in st.session_state:
         df = st.session_state.df.copy()
+
         st.header("Identifikasi Missing Value")
         st.write(df.isnull().sum())
 
+        st.header("Identifikasi Outlier dengan IQR")
+        def identify_outliers_iqr(df):
+            outlier_counts = {}
+            for col in df.select_dtypes(include=np.number).columns:
+                Q1 = df[col].quantile(0.25)
+                Q3 = df[col].quantile(0.75)
+                IQR = Q3 - Q1
+                lower_bound = Q1 - 1.5 * IQR
+                upper_bound = Q3 + 1.5 * IQR
+                outliers = df[(df[col] < lower_bound) | (df[col] > upper_bound)]
+                outlier_counts[col] = outliers.shape[0]
+            return pd.Series(outlier_counts)
+
+        outliers_count = identify_outliers_iqr(df)
+        st.write("Jumlah Outlier per Kolom (IQR > 1.5):")
+        st.write(outliers_count)
+
+        st.subheader("Boxplot Sebelum Winsorizing")
+        fig, ax = plt.subplots(figsize=(15, 8))
+        sns.boxplot(data=df.select_dtypes(include=np.number), ax=ax)
+        ax.set_title('Boxplot Sebelum Winsorizing')
+        ax.tick_params(axis='x', rotation=45)
+        st.pyplot(fig)
+
         st.header("Winsorizing Manual (2.5% di kedua ekor)")
-        for col in df.select_dtypes(include=np.number).columns:
-            lower, upper = np.percentile(df[col], 2.5), np.percentile(df[col], 97.5)
-            df[col] = np.clip(df[col], lower, upper)
-        st.session_state.df_winsor = df
-        st.write("Data setelah winsorizing:")
-        st.dataframe(df.head())
+        df_winsor = df.copy()
+        for col in df_winsor.select_dtypes(include=np.number).columns:
+            lower, upper = np.percentile(df_winsor[col], 2.5), np.percentile(df_winsor[col], 97.5)
+            df_winsor[col] = np.clip(df_winsor[col], lower, upper)
+        st.session_state.df_winsor = df_winsor
+        st.write("Data setelah winsorizing (5 baris pertama):")
+        st.dataframe(df_winsor.head())
+
+        st.subheader("Boxplot Setelah Winsorizing")
+        fig, ax = plt.subplots(figsize=(15, 8))
+        sns.boxplot(data=df_winsor.select_dtypes(include=np.number), ax=ax)
+        ax.set_title('Boxplot Setelah Winsorizing')
+        ax.tick_params(axis='x', rotation=45)
+        st.pyplot(fig)
 
         st.header("Uji Multikolinearitas (VIF)")
-        if 'Persentase Penduduk Miskin' in df.columns:
-            X = df.drop('Persentase Penduduk Miskin', axis=1)
-            vif_data = pd.DataFrame({
-                "Feature": X.columns,
-                "VIF": [variance_inflation_factor(X.values, i) for i in range(X.shape[1])]
-            })
-            st.write(vif_data)
-            fig, ax = plt.subplots(figsize=(10, 6))
-            sns.barplot(x="Feature", y="VIF", data=vif_data, ax=ax)
-            plt.axhline(10, color='red', linestyle='--', label='Threshold (VIF=10)')
-            plt.legend()
-            st.pyplot(fig)
+
+        if 'Persentase Penduduk Miskin' in df_winsor.columns:
+            X = df_winsor.drop('Persentase Penduduk Miskin', axis=1)
+
+            def calculate_vif(X_input):
+                vif_data = pd.DataFrame()
+                vif_data["Feature"] = X_input.columns
+                vif_data["VIF"] = [variance_inflation_factor(X_input.values, i) for i in range(X_input.shape[1])]
+                return vif_data
+
+            try:
+                vif_result = calculate_vif(X)
+                st.write("Hasil Variance Inflation Factor (VIF):")
+                st.dataframe(vif_result)
+
+                fig, ax = plt.subplots(figsize=(10, 6))
+                sns.barplot(x='Feature', y='VIF', data=vif_result, ax=ax)
+                ax.set_title('Variance Inflation Factor (VIF)', fontsize=15)
+                ax.axhline(y=10, color='red', linestyle='-', label='Threshold (VIF=10)')
+                ax.tick_params(axis='x', rotation=45)
+                ax.legend()
+                plt.tight_layout()
+                st.pyplot(fig)
+            except Exception as e:
+                st.error(f"Terjadi error saat menghitung VIF: {e}")
+        else:
+            st.warning("Kolom 'Persentase Penduduk Miskin' tidak ditemukan di dataset.")
     else:
         st.error("Silakan upload data terlebih dahulu di menu Upload Data.")
 
