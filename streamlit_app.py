@@ -342,4 +342,3 @@ if menu == "Uji Signifikansi":
 
         st.info("⚠️ Uji signifikansi ini menggunakan regresi OLS tanpa penalti. Hasilnya merupakan pendekatan untuk model regularisasi.")
 
-
