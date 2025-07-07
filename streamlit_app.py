@@ -23,7 +23,7 @@ st.sidebar.image("LOGO.png", width=150)  # Logo tampil di sidebar, ukuran sedang
 st.sidebar.header("Menu")
 menu = st.sidebar.radio(
     "Pilih Menu",
-    ["Beranda", "Upload Data", "EDA", "Preprocessing", "Pemodelan"]
+    ["Beranda", "Upload Data", "EDA", "Preprocessing", "Pemodelan", "Uji Signifikansi"]
 )
 
 if menu == "Beranda":
@@ -308,5 +308,59 @@ elif menu == "Pemodelan":
 
 else:
     st.info("Silakan upload dataset Anda di sidebar untuk memulai analisis.")
+
+elif menu == "Uji Signifikansi":
+    st.title("Uji Signifikansi Koefisien Model")
+
+    if "df_winsor" not in st.session_state:
+        st.warning("Silakan lakukan preprocessing terlebih dahulu.")
+    else:
+        df = st.session_state.df_winsor.copy()
+
+        # Pilihan model untuk diuji signifikansinya
+        model_choice = st.selectbox("Pilih Model untuk Uji Signifikansi", 
+                                    ["Linear", "Ridge", "Lasso", "Elastic Net", "Elastic Net Optuna"])
+
+        # Siapkan data
+        X = df.drop('Persentase Penduduk Miskin', axis=1)
+        y = df['Persentase Penduduk Miskin']
+        X_num = X.select_dtypes(include=[np.number])
+        X_scaled = StandardScaler().fit_transform(X_num)
+        X_df_scaled = pd.DataFrame(X_scaled, columns=X_num.columns)
+        X_const = sm.add_constant(X_df_scaled)
+
+        # Fit model sesuai pilihan
+        if model_choice == "Linear":
+            model = sm.OLS(y, X_const).fit()
+        elif model_choice == "Ridge":
+            # Fit model Ridge biasa dulu (alpha default), lalu uji dengan OLS
+            ridge = RidgeCV().fit(X_scaled, y)
+            model = sm.OLS(y, X_const).fit()
+        elif model_choice == "Lasso":
+            lasso = LassoCV(max_iter=10000).fit(X_scaled, y)
+            model = sm.OLS(y, X_const).fit()
+        elif model_choice == "Elastic Net":
+            elastic = ElasticNetCV(max_iter=10000).fit(X_scaled, y)
+            model = sm.OLS(y, X_const).fit()
+        elif model_choice == "Elastic Net Optuna":
+            def objective(trial):
+                alpha = trial.suggest_float('alpha', 1e-5, 1.0, log=True)
+                l1_ratio = trial.suggest_float('l1_ratio', 0.01, 1.0)
+                enet = ElasticNet(alpha=alpha, l1_ratio=l1_ratio, max_iter=10000)
+                return np.mean(cross_val_score(enet, X_scaled, y, scoring="r2", cv=5))
+
+            study = optuna.create_study(direction='maximize')
+            study.optimize(objective, n_trials=100)
+            best_alpha = study.best_params['alpha']
+            best_l1_ratio = study.best_params['l1_ratio']
+            elastic_optuna = ElasticNet(alpha=best_alpha, l1_ratio=best_l1_ratio).fit(X_scaled, y)
+            model = sm.OLS(y, X_const).fit()
+
+        # Tampilkan hasil uji
+        st.subheader("Ringkasan Hasil Regresi OLS (Untuk Uji Signifikansi)")
+        st.text(model.summary())
+
+        st.info("⚠️ Catatan: Uji signifikansi ini berbasis model OLS (tanpa penalti), sehingga interpretasi pada model Ridge, Lasso, dan Elastic Net hanya bersifat pendekatan.")
+
 
 
