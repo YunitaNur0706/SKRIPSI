@@ -19,7 +19,7 @@ st.set_page_config(page_title="Analisis Kemiskinan dengan Regularisasi", layout=
 st.title("Aplikasi Analisis Tingkat Kemiskinan di Indonesia")
 
 # Menu navigasi aplikasi + logo di sidebar
-st.sidebar.image("LOGO.png", width=100)  # Logo tampil di sidebar, ukuran kecil (100px)
+st.sidebar.image("LOGO.png", width=150)  # Logo tampil di sidebar, ukuran sedang (150px)
 st.sidebar.header("Menu")
 menu = st.sidebar.radio(
     "Pilih Menu",
