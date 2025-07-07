@@ -136,34 +136,40 @@ elif menu == "Preprocessing":
         ax.tick_params(axis='x', rotation=45)
         st.pyplot(fig)
 
-      # Update df_analysis dengan data yang sudah di-winsorize
-        df_analysis = df_winsorized.copy()
+        # Update df_analysis dengan data yang sudah di-winsorize
+        df_analysis = df_winsor.copy()
 
         X = df_analysis.drop('Persentase Penduduk Miskin', axis=1)
         y = df_analysis['Persentase Penduduk Miskin']
 
-     # PASTIKAN hanya kolom numerik untuk VIF
+        # PASTIKAN hanya kolom numerik untuk VIF
         X_num = X.select_dtypes(include=[np.number])
 
-    # UJI MULTIKOLINEARITAS
-    def calculate_vif(X_input):
-    vif_data = pd.DataFrame()
-    vif_data["feature"] = X_input.columns
-    vif_data["VIF"] = [variance_inflation_factor(X_input.values, i) for i in range(X_input.shape[1])]
-    return vif_data
+        st.header("Uji Multikolinearitas (VIF)")
 
-    vif = calculate_vif(X_num)
-    print("\nVariance Inflation Factor (VIF):")
-    print(vif)
+        def calculate_vif(X_input):
+            vif_data = pd.DataFrame()
+            vif_data["feature"] = X_input.columns
+            vif_data["VIF"] = [variance_inflation_factor(X_input.values, i) for i in range(X_input.shape[1])]
+            return vif_data
 
-    plt.figure(figsize=(10, 6))
-    sns.barplot(x='feature', y='VIF', data=vif)
-    plt.title('Variance Inflation Factor (VIF)', fontsize=15)
-    plt.axhline(y=10, color='r', linestyle='-', label='Threshold (VIF=10)')
-    plt.xticks(rotation=45)
-    plt.legend()
-    plt.tight_layout()
-    plt.show()
+        try:
+            vif = calculate_vif(X_num)
+            st.write(vif)
+
+            fig, ax = plt.subplots(figsize=(10, 6))
+            sns.barplot(x='feature', y='VIF', data=vif, ax=ax)
+            ax.set_title('Variance Inflation Factor (VIF)')
+            ax.axhline(y=10, color='r', linestyle='--', label='Threshold (VIF=10)')
+            ax.legend()
+            ax.tick_params(axis='x', rotation=45)
+            st.pyplot(fig)
+
+        except Exception as e:
+            st.error(f"Terjadi error saat menghitung VIF: {e}")
+
+    else:
+        st.error("Silakan upload data terlebih dahulu di menu Upload Data.")
 
 # PEMODELAN
 elif menu == "Pemodelan":
