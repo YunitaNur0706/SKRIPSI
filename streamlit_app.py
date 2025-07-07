@@ -322,6 +322,23 @@ elif menu == "Pemodelan":
             with st.expander("📊 Uji Signifikansi (OLS Summary)"):
                 st.text(ols_model.summary())
 
+                # Ambil data ringkasan dari summary
+                st.subheader("📋 Tabel P-Value per Variabel")
+                signif_df = ols_model.summary2().tables[1].copy()
+                signif_df = signif_df.drop("const", errors='ignore')  # hilangkan intercept jika ada
+                signif_table = signif_df[["Coef.", "Std.Err.", "P>|t|"]]
+                signif_table.columns = ["Koefisien", "Standard Error", "P-Value"]
+                st.dataframe(signif_table.style.format({"Koefisien": "{:.4f}", "Standard Error": "{:.4f}", "P-Value": "{:.4f}"}))
+
+                # Tambahan: Kesimpulan Signifikansi
+                st.subheader("📌 Kesimpulan Uji Signifikansi per Variabel")
+                for var, row in signif_table.iterrows():
+                    p_val = row["P-Value"]
+                    if p_val < 0.05:
+                        st.success(f"✅ Variabel **{var}** signifikan terhadap persentase penduduk miskin (p = {p_val:.4f})")
+                    else:
+                        st.warning(f"⚠️ Variabel **{var}** *tidak signifikan* terhadap persentase penduduk miskin (p = {p_val:.4f})")
+
             # Uji Normalitas Residual (Shapiro-Wilk)
             from scipy.stats import shapiro
             residuals = y_train - ols_model.predict(X_sm)
