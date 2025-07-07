@@ -309,7 +309,12 @@ elif menu == "Pemodelan":
 else:
     st.info("Silakan upload dataset Anda di sidebar untuk memulai analisis.")
 
-elif menu == "Uji Signifikansi":
+# ================================
+# MENU UJI SIGNIFIKANSI (Tambahan)
+# ================================
+if menu == "Uji Signifikansi":
+    import statsmodels.api as sm  # Pastikan statsmodels sudah di-import di awal
+
     st.title("Uji Signifikansi Koefisien Model")
 
     if "df_winsor" not in st.session_state:
