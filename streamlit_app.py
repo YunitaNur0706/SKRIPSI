@@ -11,7 +11,6 @@ st.set_page_config(page_title="Analisis Faktor Kemiskinan Indonesia", layout="wi
 st.title("Aplikasi Analisis Faktor-Faktor yang Mempengaruhi Tingkat Kemiskinan di Indonesia")
 st.write("Metode: **Elastic Net Regression**")
 
-# Menu navigasi di sidebar
 menu = st.sidebar.radio(
     "Pilih Menu",
     ("Upload Data", "EDA", "Preprocessing")
