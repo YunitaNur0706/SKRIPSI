@@ -3,4 +3,9 @@ pandas
 numpy
 seaborn
 matplotlib
+openpyxl
+scipy
+statsmodels
 scikit-learn
+optuna
+
