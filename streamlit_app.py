@@ -18,27 +18,28 @@ warnings.filterwarnings('ignore')
 st.set_page_config(page_title="Analisis Kemiskinan dengan Regularisasi", layout="wide")
 st.title("Aplikasi Analisis Tingkat Kemiskinan di Indonesia")
 
-# 📝 Pengantar aplikasi
-st.markdown("""
-📊 **Selamat Datang di Aplikasi Analisis Tingkat Kemiskinan di Indonesia**
-
-Aplikasi ini merupakan alat bantu interaktif berbasis data untuk menganalisis faktor-faktor yang memengaruhi persentase penduduk miskin di berbagai daerah di Indonesia.  
-Melalui proses pemodelan regresi seperti Linear, Ridge, Lasso, Elastic Net, hingga Elastic Net yang dioptimasi dengan Optuna, aplikasi ini membantu pengguna memahami hubungan antara variabel-variabel sosial-ekonomi dengan tingkat kemiskinan.
-
-🎯 **Tujuan Penggunaan Aplikasi:**  
-Aplikasi ini bertujuan untuk memudahkan analisis data kemiskinan dengan antarmuka yang sederhana, sehingga pengguna dapat mengidentifikasi variabel yang paling signifikan memengaruhi tingkat kemiskinan dan mendukung pengambilan keputusan berbasis data dalam upaya penanggulangan kemiskinan di Indonesia.
-
-📌 **Langkah Awal:**  
-Silakan unggah dataset Anda terlebih dahulu untuk memulai analisis.
-""")
-
 # Menu navigasi aplikasi
 st.sidebar.header("Menu")
 menu = st.sidebar.radio(
     "Pilih Menu",
-    ["Upload Data", "EDA", "Preprocessing", "Pemodelan"]
+    ["Beranda", "Upload Data", "EDA", "Preprocessing", "Pemodelan"]
 )
 
+if menu == "Beranda":
+    # 📝 Pengantar aplikasi hanya muncul di halaman Beranda
+    st.markdown("""
+    📊 **Selamat Datang di Aplikasi Analisis Tingkat Kemiskinan di Indonesia**
+
+    Aplikasi ini merupakan alat bantu interaktif berbasis data untuk menganalisis faktor-faktor yang memengaruhi persentase penduduk miskin di berbagai daerah di Indonesia.  
+    Melalui proses pemodelan regresi seperti Linear, Ridge, Lasso, Elastic Net, hingga Elastic Net yang dioptimasi dengan Optuna, aplikasi ini membantu pengguna memahami hubungan antara variabel-variabel sosial-ekonomi dengan tingkat kemiskinan.
+
+    🎯 **Tujuan Penggunaan Aplikasi:**  
+    Aplikasi ini bertujuan untuk memudahkan analisis data kemiskinan dengan antarmuka yang sederhana, sehingga pengguna dapat mengidentifikasi variabel yang paling signifikan memengaruhi tingkat kemiskinan dan mendukung pengambilan keputusan berbasis data dalam upaya penanggulangan kemiskinan di Indonesia.
+
+    📌 **Langkah Awal:**  
+    Silakan unggah dataset Anda terlebih dahulu untuk memulai analisis.
+    """)
+    
 # UPLOAD DATA
 if menu == "Upload Data":
     uploaded_file = st.sidebar.file_uploader("Upload file Excel berisi data Anda", type=["xlsx"])
