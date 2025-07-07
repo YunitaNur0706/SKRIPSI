@@ -192,9 +192,14 @@ elif menu == "Pemodelan":
 
         X = df.drop('Persentase Penduduk Miskin', axis=1)
         y = df['Persentase Penduduk Miskin']
-        X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=test_size, random_state=42)
+
+        # PILIH HANYA KOLON NUMERIK UNTUK MODELING
+        X_num = X.select_dtypes(include=[np.number])
+
+        X_train, X_test, y_train, y_test = train_test_split(X_num, y, test_size=test_size, random_state=42)
         scaler = StandardScaler()
-        X_train_scaled, X_test_scaled = scaler.fit_transform(X_train), scaler.transform(X_test)
+        X_train_scaled = scaler.fit_transform(X_train)
+        X_test_scaled = scaler.transform(X_test)
 
         if st.button("Jalankan Pemodelan"):
             if model_choice == "Linear":
