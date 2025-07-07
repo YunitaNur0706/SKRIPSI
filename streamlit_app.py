@@ -215,7 +215,7 @@ elif menu == "Pemodelan":
                 model = LassoCV(alphas=[alpha], max_iter=10000).fit(X_train_scaled, y_train)
             elif model_choice == "Elastic Net":
                 model = ElasticNetCV(l1_ratio=[l1_ratio], alphas=[alpha], max_iter=10000).fit(X_train_scaled, y_train)
-            elif model_choice == "Elastic Net Optuna":
+             elif model_choice == "Elastic Net Optuna":
                 def objective(trial):
                     alpha_opt = trial.suggest_float('alpha', 1e-5, 1.0, log=True)
                     l1_ratio_opt = trial.suggest_float('l1_ratio', 0.01, 1.0)
@@ -225,9 +225,21 @@ elif menu == "Pemodelan":
                 study = optuna.create_study(direction='maximize')
                 study.optimize(objective, n_trials=n_trials)
                 best_alpha, best_l1_ratio = study.best_params['alpha'], study.best_params['l1_ratio']
-                st.write(f"Optimal alpha: {best_alpha:.6f}, Optimal l1_ratio: {best_l1_ratio:.6f}")
-                model = ElasticNet(alpha=best_alpha, l1_ratio=best_l1_ratio, max_iter=10000, random_state=42).fit(X_train_scaled, y_train)
+                best_score = study.best_value
 
+                st.subheader("Parameter Terbaik dari Optuna (Elastic Net)")
+                st.write(f"- alpha: {best_alpha:.6f}")
+                st.write(f"- l1_ratio: {best_l1_ratio:.6f}")
+                st.write("- max_iter: 10000")
+                st.write("- tol: 0.0001 (default sklearn)")
+                st.write("- selection: cyclic (default sklearn)")
+                st.write("- fit_intercept: True (default sklearn)")
+
+                st.subheader("Skor Terbaik dari Optimasi (R² CV mean)")
+                st.write(f"{best_score:.4f}")
+
+                model = ElasticNet(alpha=best_alpha, l1_ratio=best_l1_ratio, max_iter=10000, random_state=42).fit(X_train_scaled, y_train)
+                 
             y_pred = model.predict(X_test_scaled)
             st.subheader("Hasil Evaluasi Model")
             st.write(f"MAE: {metrics.mean_absolute_error(y_test, y_pred):.4f}")
