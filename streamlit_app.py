@@ -23,7 +23,7 @@ st.sidebar.image("LOGO.png", width=150)  # Logo tampil di sidebar, ukuran sedang
 st.sidebar.header("Menu")
 menu = st.sidebar.radio(
     "Pilih Menu",
-    ["Beranda", "Upload Data", "EDA", "Preprocessing", "Pemodelan", "Uji Signifikansi"]
+    ["Beranda", "Upload Data", "EDA", "Preprocessing", "Pemodelan"]
 )
 
 if menu == "Beranda":
@@ -308,6 +308,52 @@ elif menu == "Pemodelan":
             st.session_state["y_train"] = y_train
             st.session_state["X_columns"] = X_num.columns.tolist()
 
+                        # ============================================
+            # 🔍 UJI SIGNIFIKANSI & UJI ASUMSI
+            # ============================================
+
+            st.subheader("🔍 Uji Signifikansi dan Uji Asumsi")
+
+            # OLS untuk Uji Signifikansi
+            import statsmodels.api as sm
+            X_sm = sm.add_constant(X_train_scaled)  # tambahkan intercept
+            ols_model = sm.OLS(y_train, X_sm).fit()
+
+            with st.expander("📊 Uji Signifikansi (OLS Summary)"):
+                st.text(ols_model.summary())
+
+            # Uji Normalitas Residual (Shapiro-Wilk)
+            from scipy.stats import shapiro
+            residuals = y_train - ols_model.predict(X_sm)
+            shapiro_stat, shapiro_p = shapiro(residuals)
+            with st.expander("📈 Uji Normalitas (Shapiro-Wilk)"):
+                st.write(f"p-value: {shapiro_p:.4f}")
+                if shapiro_p > 0.05:
+                    st.success("Distribusi residual normal (tidak tolak H0)")
+                else:
+                    st.error("Distribusi residual tidak normal (tolak H0)")
+
+            # Uji Homoskedastisitas (Breusch-Pagan)
+            from statsmodels.stats.diagnostic import het_breuschpagan
+            bp_test = het_breuschpagan(residuals, X_sm)
+            with st.expander("📉 Uji Homoskedastisitas (Breusch-Pagan)"):
+                st.write(f"p-value: {bp_test[1]:.4f}")
+                if bp_test[1] > 0.05:
+                    st.success("Tidak terdapat masalah heteroskedastisitas (tidak tolak H0)")
+                else:
+                    st.error("Terdapat masalah heteroskedastisitas (tolak H0)")
+
+            # Uji Autokorelasi (Durbin-Watson)
+            from statsmodels.stats.stattools import durbin_watson
+            dw = durbin_watson(residuals)
+            with st.expander("🔁 Uji Autokorelasi (Durbin-Watson)"):
+                st.write(f"Statistik Durbin-Watson: {dw:.4f}")
+                if 1.5 < dw < 2.5:
+                    st.success("Tidak terdapat autokorelasi yang signifikan")
+                else:
+                    st.warning("Terdapat indikasi autokorelasi")
+
+
     else:
         st.error("Silakan lakukan preprocessing terlebih dahulu di menu Preprocessing.")
         st.success("Preprocessing Data Selesai! Anda siap melanjutkan ke modeling Elastic Net Regression.")
@@ -315,30 +361,4 @@ elif menu == "Pemodelan":
 else:
     st.info("Silakan upload dataset Anda di sidebar untuk memulai analisis.")
 
-# ================================
-# MENU UJI SIGNIFIKANSI (Tambahan)
-# ================================
-if menu == "Uji Signifikansi":
-    import statsmodels.api as sm
-    st.title("Uji Signifikansi Koefisien Model")
-
-    if "last_model_choice" not in st.session_state:
-        st.warning("⚠️ Anda belum menjalankan pemodelan. Silakan jalankan pemodelan terlebih dahulu di menu 'Pemodelan'.")
-    else:
-        model_choice = st.session_state["last_model_choice"]
-        X_scaled = st.session_state["X_train_scaled"]
-        y_train = st.session_state["y_train"]
-        X_columns = st.session_state["X_columns"]
-
-        # Tambahkan konstanta untuk OLS
-        X_df_scaled = pd.DataFrame(X_scaled, columns=X_columns)
-        X_const = sm.add_constant(X_df_scaled)
-
-        # Jalankan OLS
-        model = sm.OLS(y_train, X_const).fit()
-
-        st.subheader(f"Hasil Uji Signifikansi Model: {model_choice}")
-        st.text(model.summary())
-
-        st.info("⚠️ Uji signifikansi ini menggunakan regresi OLS tanpa penalti. Hasilnya merupakan pendekatan untuk model regularisasi.")
 
