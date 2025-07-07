@@ -136,36 +136,34 @@ elif menu == "Preprocessing":
         ax.tick_params(axis='x', rotation=45)
         st.pyplot(fig)
 
-        st.header("Uji Multikolinearitas (VIF)")
+      # Update df_analysis dengan data yang sudah di-winsorize
+        df_analysis = df_winsorized.copy()
 
-        if 'Persentase Penduduk Miskin' in df_winsor.columns:
-            X = df_winsor.drop('Persentase Penduduk Miskin', axis=1)
+        X = df_analysis.drop('Persentase Penduduk Miskin', axis=1)
+        y = df_analysis['Persentase Penduduk Miskin']
 
-            def calculate_vif(X_input):
-                vif_data = pd.DataFrame()
-                vif_data["Feature"] = X_input.columns
-                vif_data["VIF"] = [variance_inflation_factor(X_input.values, i) for i in range(X_input.shape[1])]
-                return vif_data
+     # PASTIKAN hanya kolom numerik untuk VIF
+        X_num = X.select_dtypes(include=[np.number])
 
-            try:
-                vif_result = calculate_vif(X)
-                st.write("Hasil Variance Inflation Factor (VIF):")
-                st.dataframe(vif_result)
+    # UJI MULTIKOLINEARITAS
+    def calculate_vif(X_input):
+    vif_data = pd.DataFrame()
+    vif_data["feature"] = X_input.columns
+    vif_data["VIF"] = [variance_inflation_factor(X_input.values, i) for i in range(X_input.shape[1])]
+    return vif_data
 
-                fig, ax = plt.subplots(figsize=(10, 6))
-                sns.barplot(x='Feature', y='VIF', data=vif_result, ax=ax)
-                ax.set_title('Variance Inflation Factor (VIF)', fontsize=15)
-                ax.axhline(y=10, color='red', linestyle='-', label='Threshold (VIF=10)')
-                ax.tick_params(axis='x', rotation=45)
-                ax.legend()
-                plt.tight_layout()
-                st.pyplot(fig)
-            except Exception as e:
-                st.error(f"Terjadi error saat menghitung VIF: {e}")
-        else:
-            st.warning("Kolom 'Persentase Penduduk Miskin' tidak ditemukan di dataset.")
-    else:
-        st.error("Silakan upload data terlebih dahulu di menu Upload Data.")
+    vif = calculate_vif(X_num)
+    print("\nVariance Inflation Factor (VIF):")
+    print(vif)
+
+    plt.figure(figsize=(10, 6))
+    sns.barplot(x='feature', y='VIF', data=vif)
+    plt.title('Variance Inflation Factor (VIF)', fontsize=15)
+    plt.axhline(y=10, color='r', linestyle='-', label='Threshold (VIF=10)')
+    plt.xticks(rotation=45)
+    plt.legend()
+    plt.tight_layout()
+    plt.show()
 
 # PEMODELAN
 elif menu == "Pemodelan":
