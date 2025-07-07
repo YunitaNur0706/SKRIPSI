@@ -36,6 +36,15 @@ if menu == "Upload Data":
 elif menu == "EDA":
     if "df" in st.session_state:
         df = st.session_state.df
+        st.header("Informasi Data")
+        buffer = []
+        df.info(buf=buffer := [])
+        info_str = '\n'.join(buffer)
+        st.text(info_str)
+
+        st.header("Deskriptif Statistik")
+        st.write(df.describe())
+
         st.header("Heatmap Korelasi")
         corr = df.select_dtypes(include=np.number).corr()
         fig, ax = plt.subplots(figsize=(12, 8))
@@ -49,6 +58,24 @@ elif menu == "EDA":
             sns.histplot(df[col], kde=True, ax=ax)
             ax.set_title(f"Distribusi {col}")
             st.pyplot(fig)
+
+        st.header("Scatter Plot dengan Target (Persentase Penduduk Miskin)")
+        if 'Persentase Penduduk Miskin' in df.columns:
+            y_col = 'Persentase Penduduk Miskin'
+            indep_cols = [col for col in num_cols if col != y_col]
+            for col in indep_cols:
+                fig, ax = plt.subplots(figsize=(6, 3))
+                sns.scatterplot(x=df[col], y=df[y_col], ax=ax)
+                ax.set_title(f"{col} vs {y_col}")
+                st.pyplot(fig)
+
+        st.header("Pairplot Multivariat")
+        fig = sns.pairplot(df.select_dtypes(include=np.number), diag_kind='kde', corner=True)
+        st.pyplot(fig)
+
+        st.header("Clustered Heatmap Korelasi")
+        fig = sns.clustermap(df.select_dtypes(include=np.number).corr(), annot=True, fmt=".2f", cmap='coolwarm', center=0)
+        st.pyplot(fig.fig)
     else:
         st.error("Silakan upload data terlebih dahulu di menu Upload Data.")
 
