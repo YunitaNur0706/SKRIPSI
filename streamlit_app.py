@@ -302,6 +302,12 @@ elif menu == "Pemodelan":
                 st.subheader("Variabel yang Tetap Digunakan (Koefisien ≠ 0)")
                 st.dataframe(remaining)
 
+            # ✅ Tambahan: Simpan model dan data untuk uji signifikansi
+            st.session_state["last_model_choice"] = model_choice
+            st.session_state["X_train_scaled"] = X_train_scaled
+            st.session_state["y_train"] = y_train
+            st.session_state["X_columns"] = X_num.columns.tolist()
+
     else:
         st.error("Silakan lakukan preprocessing terlebih dahulu di menu Preprocessing.")
         st.success("Preprocessing Data Selesai! Anda siap melanjutkan ke modeling Elastic Net Regression.")
@@ -312,60 +318,30 @@ else:
 # ================================
 # MENU UJI SIGNIFIKANSI (Tambahan)
 # ================================
-if menu == "Uji Signifikansi":
-    import statsmodels.api as sm  # Pastikan statsmodels sudah di-import di awal
-
+elif menu == "Uji Signifikansi":
+    import statsmodels.api as sm
     st.title("Uji Signifikansi Koefisien Model")
 
-    if "df_winsor" not in st.session_state:
-        st.warning("Silakan lakukan preprocessing terlebih dahulu.")
+    if "last_model_choice" not in st.session_state:
+        st.warning("⚠️ Anda belum menjalankan pemodelan. Silakan jalankan pemodelan terlebih dahulu di menu 'Pemodelan'.")
     else:
-        df = st.session_state.df_winsor.copy()
+        model_choice = st.session_state["last_model_choice"]
+        X_scaled = st.session_state["X_train_scaled"]
+        y_train = st.session_state["y_train"]
+        X_columns = st.session_state["X_columns"]
 
-        # Pilihan model untuk diuji signifikansinya
-        model_choice = st.selectbox("Pilih Model untuk Uji Signifikansi", 
-                                    ["Linear", "Ridge", "Lasso", "Elastic Net", "Elastic Net Optuna"])
-
-        # Siapkan data
-        X = df.drop('Persentase Penduduk Miskin', axis=1)
-        y = df['Persentase Penduduk Miskin']
-        X_num = X.select_dtypes(include=[np.number])
-        X_scaled = StandardScaler().fit_transform(X_num)
-        X_df_scaled = pd.DataFrame(X_scaled, columns=X_num.columns)
+        # Tambahkan konstanta untuk OLS
+        X_df_scaled = pd.DataFrame(X_scaled, columns=X_columns)
         X_const = sm.add_constant(X_df_scaled)
 
-        # Fit model sesuai pilihan
-        if model_choice == "Linear":
-            model = sm.OLS(y, X_const).fit()
-        elif model_choice == "Ridge":
-            # Fit model Ridge biasa dulu (alpha default), lalu uji dengan OLS
-            ridge = RidgeCV().fit(X_scaled, y)
-            model = sm.OLS(y, X_const).fit()
-        elif model_choice == "Lasso":
-            lasso = LassoCV(max_iter=10000).fit(X_scaled, y)
-            model = sm.OLS(y, X_const).fit()
-        elif model_choice == "Elastic Net":
-            elastic = ElasticNetCV(max_iter=10000).fit(X_scaled, y)
-            model = sm.OLS(y, X_const).fit()
-        elif model_choice == "Elastic Net Optuna":
-            def objective(trial):
-                alpha = trial.suggest_float('alpha', 1e-5, 1.0, log=True)
-                l1_ratio = trial.suggest_float('l1_ratio', 0.01, 1.0)
-                enet = ElasticNet(alpha=alpha, l1_ratio=l1_ratio, max_iter=10000)
-                return np.mean(cross_val_score(enet, X_scaled, y, scoring="r2", cv=5))
+        # Jalankan OLS
+        model = sm.OLS(y_train, X_const).fit()
 
-            study = optuna.create_study(direction='maximize')
-            study.optimize(objective, n_trials=100)
-            best_alpha = study.best_params['alpha']
-            best_l1_ratio = study.best_params['l1_ratio']
-            elastic_optuna = ElasticNet(alpha=best_alpha, l1_ratio=best_l1_ratio).fit(X_scaled, y)
-            model = sm.OLS(y, X_const).fit()
-
-        # Tampilkan hasil uji
-        st.subheader("Ringkasan Hasil Regresi OLS (Untuk Uji Signifikansi)")
+        st.subheader(f"Hasil Uji Signifikansi Model: {model_choice}")
         st.text(model.summary())
 
-        st.info("⚠️ Catatan: Uji signifikansi ini berbasis model OLS (tanpa penalti), sehingga interpretasi pada model Ridge, Lasso, dan Elastic Net hanya bersifat pendekatan.")
+        st.info("⚠️ Uji signifikansi ini menggunakan regresi OLS tanpa penalti. Hasilnya merupakan pendekatan untuk model regularisasi.")
+
 
 
 
