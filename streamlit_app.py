@@ -232,9 +232,10 @@ elif menu == "Pemodelan":
             st.write("Intercept:", model.intercept_)
             st.write("Koefisien:", model.coef_)
 
+            
             # TAMPILKAN NAMA VARIABEL + KOEFISIEN
             coef_df = pd.DataFrame({
-                "Feature": X.columns,
+                "Feature": X_num.columns,
                 "Coefficient": model.coef_
             })
 
