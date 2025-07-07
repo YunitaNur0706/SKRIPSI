@@ -6,12 +6,13 @@ import seaborn as sns
 import io
 import matplotlib.pyplot as plt
 import warnings
-from sklearn.model_selection import train_test_split
+from sklearn.model_selection import train_test_split, cross_val_score  # <--- tambahkan cross_val_score di sini!
 from sklearn.preprocessing import StandardScaler
 from sklearn.linear_model import LinearRegression, RidgeCV, LassoCV, ElasticNetCV, ElasticNet
 from sklearn import metrics
 from statsmodels.stats.outliers_influence import variance_inflation_factor
 warnings.filterwarnings('ignore')
+
 
 st.set_page_config(page_title="Analisis Kemiskinan dengan Regularisasi", layout="wide")
 st.title("Aplikasi Analisis Tingkat Kemiskinan di Indonesia")
