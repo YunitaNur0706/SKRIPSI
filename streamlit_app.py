@@ -191,8 +191,8 @@ elif menu == "Pemodelan":
             alpha = st.number_input("Alpha (λ) untuk regularisasi", min_value=0.00001, max_value=10.0, value=1.0, format="%.5f")
             if model_choice == "Elastic Net":
                 l1_ratio = st.slider("l1_ratio Elastic Net", 0.01, 1.0, 0.5)
-       
         elif model_choice == "Elastic Net Optuna":
+            # PENTING: input jumlah trial sebelum tombol
             n_trials = st.number_input("Jumlah trial Optuna", min_value=10, max_value=5000, value=100, step=10)
 
         X = df.drop('Persentase Penduduk Miskin', axis=1)
@@ -206,6 +206,7 @@ elif menu == "Pemodelan":
         X_train_scaled = scaler.fit_transform(X_train)
         X_test_scaled = scaler.transform(X_test)
 
+        # Tombol dieksekusi SETELAH semua input selesai diatur
         if st.button("Jalankan Pemodelan"):
             if model_choice == "Linear":
                 model = LinearRegression().fit(X_train_scaled, y_train)
@@ -215,7 +216,7 @@ elif menu == "Pemodelan":
                 model = LassoCV(alphas=[alpha], max_iter=10000).fit(X_train_scaled, y_train)
             elif model_choice == "Elastic Net":
                 model = ElasticNetCV(l1_ratio=[l1_ratio], alphas=[alpha], max_iter=10000).fit(X_train_scaled, y_train)
-             elif model_choice == "Elastic Net Optuna":
+            elif model_choice == "Elastic Net Optuna":
                 def objective(trial):
                     alpha_opt = trial.suggest_float('alpha', 1e-5, 1.0, log=True)
                     l1_ratio_opt = trial.suggest_float('l1_ratio', 0.01, 1.0)
@@ -239,7 +240,7 @@ elif menu == "Pemodelan":
                 st.write(f"{best_score:.4f}")
 
                 model = ElasticNet(alpha=best_alpha, l1_ratio=best_l1_ratio, max_iter=10000, random_state=42).fit(X_train_scaled, y_train)
-                 
+
             y_pred = model.predict(X_test_scaled)
             st.subheader("Hasil Evaluasi Model")
             st.write(f"MAE: {metrics.mean_absolute_error(y_test, y_pred):.4f}")
@@ -249,25 +250,18 @@ elif menu == "Pemodelan":
             st.write("Intercept:", model.intercept_)
             st.write("Koefisien:", model.coef_)
 
-            # TAMPILKAN NAMA VARIABEL + KOEFISIEN
-            coef_df = pd.DataFrame({
-                "Feature": X_num.columns,
-                "Coefficient": model.coef_
-            })
-
+            coef_df = pd.DataFrame({"Feature": X_num.columns, "Coefficient": model.coef_})
             st.subheader(f"Koefisien Model {model_choice}")
             st.dataframe(coef_df)
 
             if model_choice == "Lasso":
                 eliminated = coef_df[coef_df['Coefficient'] == 0]
                 remaining = coef_df[coef_df['Coefficient'] != 0]
-
                 st.subheader("Variabel Dieliminasi oleh Lasso (Koefisien = 0)")
                 if eliminated.empty:
                     st.write("Tidak ada variabel yang dieliminasi. Semua variabel tetap digunakan model.")
                 else:
                     st.dataframe(eliminated)
-
                 st.subheader("Variabel yang Tetap Digunakan (Koefisien ≠ 0)")
                 st.dataframe(remaining)
 
@@ -277,4 +271,5 @@ elif menu == "Pemodelan":
 
 else:
     st.info("Silakan upload dataset Anda di sidebar untuk memulai analisis.")
+
 
