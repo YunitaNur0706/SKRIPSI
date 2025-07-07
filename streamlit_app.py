@@ -3,6 +3,7 @@ import pandas as pd
 import numpy as np
 import seaborn as sns
 import matplotlib.pyplot as plt
+import io 
 import warnings
 warnings.filterwarnings('ignore')
 
@@ -24,9 +25,9 @@ if uploaded_file is not None:
 
     # Info Data
     st.subheader("Informasi Data")
-    buffer = []
+    buffer = io.StringIO()  # BUKAN list kosong
     df.info(buf=buffer)
-    info_str = '\n'.join(buffer)
+    info_str = buffer.getvalue()
     st.text(info_str)
 
     # Deskriptif Statistik
