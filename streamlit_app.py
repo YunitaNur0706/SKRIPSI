@@ -6,7 +6,8 @@ import seaborn as sns
 import io
 import matplotlib.pyplot as plt
 import warnings
-from sklearn.model_selection import train_test_split, cross_val_score  # <--- tambahkan cross_val_score di sini!
+from sklearn.model_selection import train_test_split
+from sklearn.model_selection import cross_val_score
 from sklearn.preprocessing import StandardScaler
 from sklearn.linear_model import LinearRegression, RidgeCV, LassoCV, ElasticNetCV, ElasticNet
 from sklearn import metrics
