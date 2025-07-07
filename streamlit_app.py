@@ -23,7 +23,7 @@ st.sidebar.image("LOGO.png", width=150)  # Logo tampil di sidebar, ukuran sedang
 st.sidebar.header("Menu")
 menu = st.sidebar.radio(
     "Pilih Menu",
-    ["Beranda", "Upload Data", "EDA", "Preprocessing", "Pemodelan"]
+    ["Beranda", "Upload Data", "EDA", "Preprocessing", "Pemodelan", "Visualisasi Peta Interaktif"]
 )
 
 if menu == "Beranda":
@@ -378,4 +378,58 @@ elif menu == "Pemodelan":
 else:
     st.info("Silakan upload dataset Anda di sidebar untuk memulai analisis.")
 
+
+# MENU VISUALISASI PETA INTERAKTIF
+elif menu == "Visualisasi Peta Interaktif":
+    st.header("🗺️ Visualisasi Peta Interaktif Tingkat Kemiskinan dan Variabel Sosial Ekonomi")
+
+    # Upload file jika belum ada di session_state
+    if "df" not in st.session_state:
+        uploaded_file = st.file_uploader("Upload file Excel data kemiskinan", type=["xlsx"])
+        if uploaded_file:
+            df_map = pd.read_excel(uploaded_file)
+            st.session_state["df"] = df_map
+        else:
+            st.warning("Silakan upload file kemiskinan.xlsx terlebih dahulu.")
+            st.stop()
+    else:
+        df_map = st.session_state["df"]
+
+    # Load file GeoJSON
+    import json
+    import geopandas as gpd
+    import plotly.express as px
+
+    geojson_path = "indonesia.geojson"  # pastikan file ini ada di folder yang sama
+    try:
+        with open(geojson_path, "r", encoding="utf-8") as f:
+            geojson_data = json.load(f)
+    except FileNotFoundError:
+        st.error("File GeoJSON 'indonesia.geojson' tidak ditemukan. Pastikan sudah kamu simpan di direktori yang sama dengan script.")
+        st.stop()
+
+    # Periksa kolom yang tersedia
+    available_vars = df_map.columns.tolist()
+    st.markdown("### Pilih variabel yang ingin divisualisasikan pada peta")
+    selected_var = st.selectbox("Variabel", available_vars[1:])  # skip kolom 'Nama Wilayah'
+
+    # Normalisasi nama wilayah agar cocok dengan GeoJSON
+    df_map["Nama Wilayah"] = df_map["Nama Wilayah"].str.upper()
+
+    # Buat choropleth map
+    fig = px.choropleth(
+        df_map,
+        geojson=geojson_data,
+        featureidkey="properties.nama",  # sesuaikan dengan struktur geojson kamu
+        locations="Nama Wilayah",
+        color=selected_var,
+        color_continuous_scale="Reds",
+        title=f"Peta Interaktif: {selected_var}",
+        hover_name="Nama Wilayah"
+    )
+
+    fig.update_geos(fitbounds="locations", visible=False)
+    fig.update_layout(margin={"r":0,"t":50,"l":0,"b":0})
+
+    st.plotly_chart(fig, use_container_width=True)
 
