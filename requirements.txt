@@ -4,8 +4,8 @@ numpy
 seaborn
 matplotlib
 openpyxl
-scipy==1.11.4
-statsmodels==0.14.0
+scipy
+statsmodels
 scikit-learn
 optuna
 
