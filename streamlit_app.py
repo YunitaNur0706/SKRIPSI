@@ -11,28 +11,25 @@ st.set_page_config(page_title="Analisis Faktor Kemiskinan Indonesia", layout="wi
 st.title("Aplikasi Analisis Faktor-Faktor yang Mempengaruhi Tingkat Kemiskinan di Indonesia")
 st.write("Metode: **Elastic Net Regression**")
 
-# Upload dataset
-st.sidebar.header("Upload Data")
-uploaded_file = st.sidebar.file_uploader("Upload file Excel berisi data Anda", type=["xlsx"])
+# Menu navigasi di sidebar
+menu = st.sidebar.radio(
+    "Pilih Menu",
+    ("Upload Data", "EDA", "Preprocessing")
+)
 
+# Upload dataset
+uploaded_file = st.sidebar.file_uploader("Upload file Excel berisi data Anda", type=["xlsx"])
 if uploaded_file is not None:
     df = pd.read_excel(uploaded_file)
     st.sidebar.success("Data berhasil diunggah!")
 
-    # Buat tabs: Upload, EDA, Preprocessing
-    tab1, tab2, tab3 = st.tabs(["📂 Upload Data", "📊 EDA", "⚙️ Preprocessing"])
-
-    # ====================
-    # TAB 1: UPLOAD DATA
-    # ====================
-    with tab1:
-        st.subheader("Tabel Data")
+    if menu == "Upload Data":
+        st.header("📂 Upload Data")
         st.dataframe(df)
 
-    # ====================
-    # TAB 2: EDA
-    # ====================
-    with tab2:
+    elif menu == "EDA":
+        st.header("📊 Exploratory Data Analysis (EDA)")
+
         st.subheader("Informasi Data")
         buffer = io.StringIO()
         df.info(buf=buffer)
@@ -74,10 +71,9 @@ if uploaded_file is not None:
         fig = sns.clustermap(df.select_dtypes(include=np.number).corr(), annot=True, fmt=".2f", cmap='coolwarm', center=0)
         st.pyplot(fig.fig)
 
-    # ====================
-    # TAB 3: PREPROCESSING
-    # ====================
-    with tab3:
+    elif menu == "Preprocessing":
+        st.header("⚙️ Preprocessing Data")
+
         st.subheader("Identifikasi Missing Value")
         missing = df.isnull().sum()
         st.write(missing)
@@ -125,5 +121,6 @@ if uploaded_file is not None:
         st.pyplot(fig)
 
         st.success("Preprocessing Data Selesai! Anda siap melanjutkan ke modeling Elastic Net Regression.")
+
 else:
     st.info("Silakan upload dataset Anda di sidebar untuk memulai analisis.")
