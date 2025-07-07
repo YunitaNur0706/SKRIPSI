@@ -6,7 +6,7 @@ import matplotlib.pyplot as plt
 import warnings
 warnings.filterwarnings('ignore')
 
-# Judul aplikasi
+# Judul_aplikasi
 st.set_page_config(page_title="Analisis Faktor Kemiskinan Indonesia", layout="wide")
 st.title("Aplikasi Analisis Faktor-Faktor yang Mempengaruhi Tingkat Kemiskinan di Indonesia")
 st.write("Metode: **Elastic Net Regression**")
