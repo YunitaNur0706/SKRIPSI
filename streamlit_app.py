@@ -2,6 +2,7 @@ import streamlit as st
 import pandas as pd
 import numpy as np
 import seaborn as sns
+import io
 import matplotlib.pyplot as plt
 import warnings
 from sklearn.model_selection import train_test_split
@@ -39,9 +40,9 @@ elif menu == "EDA":
 
         # Info Data
         st.subheader("Informasi Data")
-        buffer = []
+        buffer = io.StringIO()
         df.info(buf=buffer)
-        info_str = '\n'.join(buffer)
+        info_str = buffer.getvalue()
         st.text(info_str)
 
         # Deskriptif Statistik
