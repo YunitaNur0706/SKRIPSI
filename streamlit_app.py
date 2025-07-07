@@ -26,6 +26,9 @@ menu = st.sidebar.radio(
 )
 
 if menu == "Beranda":
+    # Tampilkan logo hanya di Beranda
+    st.image("LOGO.png", width=250)
+
     # 📝 Pengantar aplikasi hanya muncul di halaman Beranda
     st.markdown("""
     📊 **Selamat Datang di Aplikasi Analisis Tingkat Kemiskinan di Indonesia**
