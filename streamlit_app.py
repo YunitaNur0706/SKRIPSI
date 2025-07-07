@@ -191,9 +191,9 @@ elif menu == "Pemodelan":
             alpha = st.number_input("Alpha (λ) untuk regularisasi", min_value=0.00001, max_value=10.0, value=1.0, format="%.5f")
             if model_choice == "Elastic Net":
                 l1_ratio = st.slider("l1_ratio Elastic Net", 0.01, 1.0, 0.5)
-
+       
         elif model_choice == "Elastic Net Optuna":
-            n_trials = st.number_input("Jumlah trial Optuna", min_value=10, max_value=500, value=100, step=10)
+            n_trials = st.number_input("Jumlah trial Optuna", min_value=10, max_value=5000, value=100, step=10)
 
         X = df.drop('Persentase Penduduk Miskin', axis=1)
         y = df['Persentase Penduduk Miskin']
