@@ -192,6 +192,9 @@ elif menu == "Pemodelan":
             if model_choice == "Elastic Net":
                 l1_ratio = st.slider("l1_ratio Elastic Net", 0.01, 1.0, 0.5)
 
+        elif model_choice == "Elastic Net Optuna":
+            n_trials = st.number_input("Jumlah trial Optuna", min_value=10, max_value=500, value=100, step=10)
+
         X = df.drop('Persentase Penduduk Miskin', axis=1)
         y = df['Persentase Penduduk Miskin']
 
@@ -213,8 +216,6 @@ elif menu == "Pemodelan":
             elif model_choice == "Elastic Net":
                 model = ElasticNetCV(l1_ratio=[l1_ratio], alphas=[alpha], max_iter=10000).fit(X_train_scaled, y_train)
             elif model_choice == "Elastic Net Optuna":
-                n_trials = st.number_input("Jumlah trial Optuna", min_value=10, max_value=500, value=100, step=10)
-
                 def objective(trial):
                     alpha_opt = trial.suggest_float('alpha', 1e-5, 1.0, log=True)
                     l1_ratio_opt = trial.suggest_float('l1_ratio', 0.01, 1.0)
