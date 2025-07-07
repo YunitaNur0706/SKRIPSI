@@ -36,48 +36,56 @@ if menu == "Upload Data":
 elif menu == "EDA":
     if "df" in st.session_state:
         df = st.session_state.df
-        st.header("Informasi Data")
+
+        # Info Data
+        st.subheader("Informasi Data")
         buffer = []
-        df.info(buf=buffer := [])
+        df.info(buf=buffer)
         info_str = '\n'.join(buffer)
         st.text(info_str)
 
-        st.header("Deskriptif Statistik")
+        # Deskriptif Statistik
+        st.subheader("Deskriptif Statistik")
         st.write(df.describe())
 
-        st.header("Heatmap Korelasi")
-        corr = df.select_dtypes(include=np.number).corr()
+        # Analisis Korelasi
+        st.subheader("Heatmap Korelasi")
+        corr_matrix = df.select_dtypes(include=np.number).corr()
         fig, ax = plt.subplots(figsize=(12, 8))
-        sns.heatmap(corr, annot=True, fmt=".2f", cmap='coolwarm', ax=ax)
+        sns.heatmap(corr_matrix, annot=True, fmt=".2f", cmap='coolwarm', square=True, ax=ax)
         st.pyplot(fig)
 
-        st.header("Distribusi Variabel Numerik")
-        num_cols = df.select_dtypes(include=np.number).columns
-        for col in num_cols:
-            fig, ax = plt.subplots(figsize=(6, 3))
+        # Distribusi Variabel
+        st.subheader("Distribusi Variabel Numerik")
+        numeric_cols = df.select_dtypes(include=['float64', 'int64']).columns
+        for col in numeric_cols:
+            fig, ax = plt.subplots(figsize=(8, 4))
             sns.histplot(df[col], kde=True, ax=ax)
-            ax.set_title(f"Distribusi {col}")
+            ax.set_title(f'Distribusi {col}')
             st.pyplot(fig)
 
-        st.header("Scatter Plot dengan Target (Persentase Penduduk Miskin)")
+        # Scatter Plot
         if 'Persentase Penduduk Miskin' in df.columns:
+            st.subheader("Scatter Plot: Variabel vs Persentase Penduduk Miskin")
             y_col = 'Persentase Penduduk Miskin'
-            indep_cols = [col for col in num_cols if col != y_col]
+            indep_cols = [col for col in numeric_cols if col != y_col]
             for col in indep_cols:
-                fig, ax = plt.subplots(figsize=(6, 3))
+                fig, ax = plt.subplots(figsize=(8, 4))
                 sns.scatterplot(x=df[col], y=df[y_col], ax=ax)
-                ax.set_title(f"{col} vs {y_col}")
+                ax.set_title(f'{col} vs {y_col}')
                 st.pyplot(fig)
 
-        st.header("Pairplot Multivariat")
+        # Pairplot
+        st.subheader("Pairplot Multivariat")
         fig = sns.pairplot(df.select_dtypes(include=np.number), diag_kind='kde', corner=True)
         st.pyplot(fig)
 
-        st.header("Clustered Heatmap Korelasi")
+        # Clustered Heatmap
+        st.subheader("Clustered Heatmap Korelasi")
         fig = sns.clustermap(df.select_dtypes(include=np.number).corr(), annot=True, fmt=".2f", cmap='coolwarm', center=0)
         st.pyplot(fig.fig)
     else:
-        st.error("Silakan upload data terlebih dahulu di menu Upload Data.")
+        st.warning("Silakan upload data terlebih dahulu di menu Upload Data.")
 
 # PREPROCESSING
 elif menu == "Preprocessing":
