@@ -190,8 +190,10 @@ elif menu == "Pemodelan":
             if model_choice == "Elastic Net":
                 l1_ratio = st.slider("l1_ratio Elastic Net", 0.01, 1.0, 0.5)
 
-        X = df.drop('Persentase Penduduk Miskin', axis=1)
+        # GUNAKAN HANYA KOLOM NUMERIK
+        X = df.drop('Persentase Penduduk Miskin', axis=1).select_dtypes(include=[np.number])
         y = df['Persentase Penduduk Miskin']
+
         X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=test_size, random_state=42)
         scaler = StandardScaler()
         X_train_scaled, X_test_scaled = scaler.fit_transform(X_train), scaler.transform(X_test)
@@ -229,7 +231,8 @@ elif menu == "Pemodelan":
     else:
         st.error("Silakan lakukan preprocessing terlebih dahulu di menu Preprocessing.")
 
-        st.success("Preprocessing Data Selesai! Anda siap melanjutkan ke modeling Elastic Net Regression.")
+    st.success("Preprocessing Data Selesai! Anda siap melanjutkan ke modeling Elastic Net Regression.")
 
 else:
     st.info("Silakan upload dataset Anda di sidebar untuk memulai analisis.")
+
