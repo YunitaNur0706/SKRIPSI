@@ -318,7 +318,7 @@ else:
 # ================================
 # MENU UJI SIGNIFIKANSI (Tambahan)
 # ================================
-elif menu == "Uji Signifikansi":
+if menu == "Uji Signifikansi":
     import statsmodels.api as sm
     st.title("Uji Signifikansi Koefisien Model")
 
@@ -341,7 +341,5 @@ elif menu == "Uji Signifikansi":
         st.text(model.summary())
 
         st.info("⚠️ Uji signifikansi ini menggunakan regresi OLS tanpa penalti. Hasilnya merupakan pendekatan untuk model regularisasi.")
-
-
 
 
