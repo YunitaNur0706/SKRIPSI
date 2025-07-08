@@ -242,6 +242,9 @@ elif menu == "Pemodelan":
         X_num = X.select_dtypes(include=[np.number])
 
         X_train, X_test, y_train, y_test = train_test_split(X_num, y, test_size=test_size, random_state=42)
+
+        X_train_raw = X_train.copy()  # ✅ Tambahan ini penting untuk uji signifikansi
+
         scaler = StandardScaler()
         X_train_scaled = scaler.fit_transform(X_train)
         X_test_scaled = scaler.transform(X_test)
@@ -316,7 +319,7 @@ elif menu == "Pemodelan":
 
             # OLS untuk Uji Signifikansi
             import statsmodels.api as sm
-            X_sm = sm.add_constant(X_train_scaled)  # tambahkan intercept
+            X_sm = sm.add_constant(X_train_raw)
             ols_model = sm.OLS(y_train, X_sm).fit()
 
             with st.expander("📊 Uji Signifikansi (OLS Summary)"):
