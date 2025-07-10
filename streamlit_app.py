@@ -32,10 +32,17 @@ if menu == "Beranda":
     📊 **Selamat Datang di Aplikasi Analisis Tingkat Kemiskinan di Indonesia**
 
     Aplikasi ini merupakan alat bantu interaktif berbasis data untuk menganalisis faktor-faktor yang memengaruhi persentase penduduk miskin di berbagai daerah di Indonesia.  
-    Melalui proses pemodelan regresi seperti Linear, Ridge, Lasso, Elastic Net, hingga Elastic Net yang dioptimasi dengan Optuna, aplikasi ini membantu pengguna memahami hubungan antara variabel-variabel sosial-ekonomi dengan tingkat kemiskinan.
+    Melalui proses pemodelan regresi seperti Linear, Ridge, Lasso, Elastic Net, hingga Elastic Net yang dioptimasi dengan Optuna, aplikasi ini membantu pengguna memahami hubungan antara variabel sosial-ekonomi dengan tingkat kemiskinan.
+
+    🔎 **Penjelasan Singkat Metode yang Digunakan:**  
+    - **Linear Regression**: Metode paling dasar yang memodelkan hubungan antara variabel input dan output secara linear tanpa penalti.  
+    - **Ridge Regression**: Model yang menambahkan penalti L2 untuk mengurangi kompleksitas dan mengatasi multikolinearitas, namun tidak mengeliminasi variabel.  
+    - **Lasso Regression**: Selain mengurangi kompleksitas seperti Ridge, Lasso dapat mengeliminasi variabel yang tidak penting dengan penalti L1.  
+    - **Elastic Net Regression**: Kombinasi dari Lasso dan Ridge yang dapat melakukan seleksi variabel sekaligus menjaga stabilitas model.  
+    - **Elastic Net Optuna**: Versi Elastic Net yang ditingkatkan dengan bantuan Optuna (teknik optimasi otomatis) untuk menemukan kombinasi parameter terbaik secara efisien.
 
     🎯 **Tujuan Penggunaan Aplikasi:**  
-    Aplikasi ini bertujuan untuk memudahkan analisis data kemiskinan dengan antarmuka yang sederhana, sehingga pengguna dapat mengidentifikasi variabel yang paling signifikan memengaruhi tingkat kemiskinan dan mendukung pengambilan keputusan berbasis data dalam upaya penanggulangan kemiskinan di Indonesia.
+    Aplikasi ini dirancang agar mudah digunakan dengan antarmuka yang sederhana dan interaktif. Pengguna dapat memanfaatkan aplikasi ini untuk mengidentifikasi variabel yang paling signifikan memengaruhi kemiskinan dan mendukung pengambilan keputusan berbasis data.
 
     📌 **Langkah Awal:**  
     Silakan unggah dataset Anda terlebih dahulu untuk memulai analisis.
