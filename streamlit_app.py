@@ -14,6 +14,16 @@ from sklearn import metrics
 from statsmodels.stats.outliers_influence import variance_inflation_factor
 warnings.filterwarnings('ignore')
 
+st.markdown(
+    """
+    <style>
+    .stApp {
+        background-color: #e0f7fa;
+    }
+    </style>
+    """,
+    unsafe_allow_html=True
+)
 
 st.set_page_config(page_title="Analisis Kemiskinan dengan Regularisasi", layout="wide")
 st.title("Aplikasi Analisis Tingkat Kemiskinan di Indonesia")
